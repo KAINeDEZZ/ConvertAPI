@@ -1,7 +1,6 @@
 from aiohttp import ClientSession, ClientTimeout, client_exceptions
 import exceptions
 from lxml import html
-from typing import List
 
 CBR_URL = 'https://www.cbr.ru/currency_base/daily/'
 
@@ -30,8 +29,6 @@ async def parse_table() -> dict or Exception:
         await client.close()
 
     if data:
-        print(data)
         return data
     else:
-        print(data)
         return exceptions.ParseException()
