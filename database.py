@@ -2,11 +2,10 @@ from aioredis import create_redis_pool, Redis
 
 
 database: Redis
-pages_count = 0
 
 
 async def init_database(ip: str, port: int):
-    global database, pages_count
+    global database
 
     database = await create_redis_pool(f'redis://{ip}:{port}', timeout=1)
 
@@ -15,8 +14,10 @@ async def init_database(ip: str, port: int):
         pass  # TODO
 
     while await database.keys('*'):
-        pages_count += 1
         await database.select(database.db + 1)
+
+    if database.db != 0:
+        await database.select(database.db - 1)
 
 
 async def close_database(redis_link):
@@ -26,10 +27,8 @@ async def close_database(redis_link):
 
 async def database_add_table(data: dict):
     try:
-        global pages_count
-        if pages_count != 0:
+        if await database.keys('*'):
             await database.select(database.db + 1)
-        pages_count += 1
 
         for key in data:
             await database.set(key, data[key])
@@ -42,13 +41,22 @@ async def database_add_table(data: dict):
 
 async def database_delete_table():
     try:
-        await database.flushall()
+        await database.flushdb()
     except Exception as ex:
         return ex
 
     if database.db != 0:
-        global pages_count
-        pages_count -= 1
         await database.select(database.db - 1)
 
     return True
+
+
+async def database_get_keys(keys):
+    try:
+        data = {}
+        for key in keys:
+            data[key] = await database.get(key)
+        return data
+
+    except Exception as ex:
+        return ex

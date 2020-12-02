@@ -1,10 +1,24 @@
 from aiohttp.web import Response, Request
 from course_parser import parse_table
-from database import database_add_table, database_delete_table
+from database import database_add_table, database_delete_table, database_get_keys
 
 
 async def convert(request: Request) -> Response:
-    return Response()  # TODO
+    params = dict(request.query)
+    if list(params.keys()) != ['from', 'to', 'amount']:
+        return Response(text='Неверные параметры')
+
+    data = await database_get_keys((params['from'], params['to']))
+    for key in data:
+        if key == 'RUR':
+            data[key] = 1
+
+        if data[key] is None:
+            return Response(text='Один из параметров задан неправильно или отсутствуют данные')
+
+        data[key] = float(data[key])
+
+    return Response(text=str(data[params['from']] * int(params['amount']) / data[params['to']]))
 
 
 async def database(request: Request) -> Response:
