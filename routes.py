@@ -14,7 +14,7 @@ class APIMethod:
         self.path = path
         self.handler = handler
 
-    def get_router_format(self):
+    def get_router_format(self) -> dict:
         return {'path': self.path, 'handler': self.handler}
 
 

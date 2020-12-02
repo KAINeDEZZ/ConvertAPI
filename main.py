@@ -3,7 +3,7 @@ from routes import create_routes
 from database import init_database
 
 
-def init_api():
+def init_api() -> Application:
     application = Application()
     create_routes(application.router)
 

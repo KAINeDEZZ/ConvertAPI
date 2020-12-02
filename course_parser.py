@@ -20,10 +20,10 @@ async def parse_table() -> dict or Exception:
                 data[cells[1].text] = float(cells[4].text.replace(',', '.')) / int(cells[2].text)
 
     except client_exceptions.ClientConnectionError:
-        return exceptions.GetTableFromWebException()
+        return exceptions.GetTableFromWebException(CBR_URL)
 
-    except Exception as ex:
-        return ex
+    except Exception as exception:
+        return exceptions.AtypicalException(exception, 'parser')
 
     finally:
         await client.close()
@@ -31,4 +31,4 @@ async def parse_table() -> dict or Exception:
     if data:
         return data
     else:
-        return exceptions.ParseException()
+        return exceptions.ParseException(CBR_URL)
